@@ -20,7 +20,7 @@ interface CacheEntry {
 // Simple in-memory cache
 const cache = new Map<string, CacheEntry>();
 const CACHE_KEY = 'instagram_posts';
-const CACHE_DURATION = parseInt(import.meta.env.INSTAGRAM_CACHE_DURATION || '30') * 60 * 1000;
+const CACHE_DURATION = parseInt(import.meta.env.INSTAGRAM_CACHE_DURATION || '1440') * 60 * 1000; // 24 horas por defecto
 
 // Función para obtener posts usando datos estáticos de transformaciones
 async function fetchInstagramPosts(): Promise<InstagramPost[]> {
