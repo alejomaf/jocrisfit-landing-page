@@ -1,11 +1,9 @@
 {
   "functions": {
-    "src/pages/api/*.ts": {
-      "maxDuration": 10
-    },
-    "src/pages/api/**/*.ts": {
-      "maxDuration": 10
-    }
+    "src/pages/api/contact.ts": { "maxDuration": 10 },
+    "src/pages/api/instagram.ts": { "maxDuration": 10 },
+    "src/pages/api/instagram/auth.ts": { "maxDuration": 10 },
+    "src/pages/api/instagram/callback.ts": { "maxDuration": 10 }
   },
   "headers": [
     {
