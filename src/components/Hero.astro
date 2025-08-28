@@ -2,79 +2,46 @@
 // Hero section component for José Valverde's fitness coaching landing page
 ---
 
-<section id="inicio" class="min-h-screen bg-gradient-to-br from-primary via-brand-dark to-primary flex items-center pt-20">
-  <div class="container mx-auto px-4 py-16">
-    <div class="grid lg:grid-cols-2 gap-12 items-center">
-      <!-- Content Column -->
-      <div class="text-center lg:text-left">
-        <div class="mb-6">
-          <span class="inline-block bg-secondary/20 text-secondary px-4 py-2 rounded-full text-sm font-semibold mb-4">
-            🏋️ Entrenador Personal Certificado
-          </span>
-        </div>
-        
-        <h1 class="text-4xl md:text-5xl lg:text-6xl font-heading font-bold text-white mb-6 leading-tight">
-          Transforma tu 
-          <span class="text-gradient">Cuerpo</span> y 
-          <span class="text-gradient">Mente</span>
-        </h1>
-        
-        <p class="text-xl text-gray-300 mb-8 leading-relaxed">
-          Soy <strong class="text-secondary">José Valverde</strong>, tu entrenador personal especializado en 
-          asesorías personalizadas. Te ayudo a alcanzar tus objetivos de fitness con 
-          planes únicos diseñados específicamente para ti.
-        </p>
-        
-        <div class="flex flex-col sm:flex-row gap-4 mb-8">
-          <button class="btn-primary text-lg px-8 py-4">
-            🚀 Comenzar Ahora
-          </button>
-          <button class="btn-secondary text-lg px-8 py-4">
-            📞 Consulta Gratuita
-          </button>
-        </div>
-        
-        <!-- Stats -->
-        <div class="grid grid-cols-3 gap-6 pt-8 border-t border-secondary/20">
-          <div class="text-center">
-            <div class="text-2xl md:text-3xl font-bold text-secondary mb-1">500+</div>
-            <div class="text-sm text-gray-400">Clientes Transformados</div>
-          </div>
-          <div class="text-center">
-            <div class="text-2xl md:text-3xl font-bold text-secondary mb-1">5+</div>
-            <div class="text-sm text-gray-400">Años de Experiencia</div>
-          </div>
-          <div class="text-center">
-            <div class="text-2xl md:text-3xl font-bold text-secondary mb-1">100%</div>
-            <div class="text-sm text-gray-400">Resultados Garantizados</div>
-          </div>
-        </div>
+<section id="inicio" class="relative min-h-screen flex items-center pt-20 overflow-hidden">
+  <!-- Background Image -->
+  <div class="absolute inset-0 z-0">
+    <img src="/foto_personal.webp" alt="José Valverde entrenador personal" class="w-full h-full object-cover" />
+    <div class="absolute inset-0 bg-black/60"></div>
+  </div>
+  
+  <!-- Content -->
+  <div class="relative z-10 w-full py-20 md:py-28 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center max-w-4xl mx-auto">
+      <div class="mb-6">
+        <span class="inline-block bg-yellow-400/20 text-yellow-400 px-4 py-2 rounded-full text-sm font-semibold mb-4 border border-yellow-400/30">
+          Entrenador Personal Certificado
+        </span>
       </div>
       
-      <!-- Image/Visual Column -->
-      <div class="relative">
-        <div class="relative z-10">
-          <!-- Placeholder for trainer image - using SVG for now -->
-          <div class="w-full max-w-md mx-auto bg-gradient-to-br from-secondary/20 to-accent/20 rounded-2xl p-8 backdrop-blur-sm border border-secondary/30">
-            <svg class="w-full h-96 text-secondary/60" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 7V9C15 9.55 14.55 10 14 10S13 9.55 13 9V7H11V9C11 9.55 10.45 10 10 10S9 9.55 9 9V7H3V9C3 10.1 3.9 11 5 11V12.5C5 13.3 5.7 14 6.5 14S8 13.3 8 12.5V11H16V12.5C16 13.3 16.7 14 17.5 14S19 13.3 19 12.5V11C20.1 11 21 10.1 21 9ZM7.5 22C6.7 22 6 21.3 6 20.5V16H8V20.5C8 21.3 7.3 22 6.5 22H7.5ZM16.5 22C17.3 22 18 21.3 18 20.5V16H16V20.5C16 21.3 16.7 22 17.5 22H16.5Z"/>
-            </svg>
-            <div class="text-center mt-4">
-              <h3 class="text-xl font-semibold text-white mb-2">José Valverde</h3>
-              <p class="text-secondary font-medium">Entrenador Personal Certificado</p>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Background decorative elements -->
-        <div class="absolute -top-4 -right-4 w-24 h-24 bg-secondary/20 rounded-full blur-xl"></div>
-        <div class="absolute -bottom-4 -left-4 w-32 h-32 bg-accent/20 rounded-full blur-xl"></div>
+      <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">
+        Transforma tu 
+        <span class="bg-gradient-to-r from-yellow-400 to-yellow-500 bg-clip-text text-transparent">Cuerpo</span> y 
+        <span class="bg-gradient-to-r from-yellow-400 to-yellow-500 bg-clip-text text-transparent">Mente</span>
+      </h1>
+      
+      <p class="text-xl md:text-2xl text-gray-200 mb-12 leading-relaxed max-w-3xl mx-auto">
+        Soy <strong class="text-yellow-400">José Valverde</strong>, tu entrenador personal especializado en 
+        asesorías personalizadas. Te ayudo a alcanzar tus objetivos de fitness con 
+        planes únicos diseñados específicamente para ti.
+      </p>
+      
+      <div class="flex flex-col sm:flex-row gap-6 justify-center items-center">
+        <button class="inline-flex items-center justify-center bg-yellow-400 hover:bg-yellow-500 active:bg-yellow-600 text-black font-semibold rounded-lg text-lg px-10 py-5 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2 focus:ring-offset-black shadow-lg hover:shadow-xl transform hover:scale-105">
+          Comenzar Ahora
+        </button>
+        <button class="inline-flex items-center justify-center bg-transparent border-2 border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-black active:bg-yellow-500 font-semibold rounded-lg text-lg px-10 py-5 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2 focus:ring-offset-black backdrop-blur-sm hover:backdrop-blur-none">
+          Consulta Gratuita
+        </button>
       </div>
     </div>
-    
     <!-- Scroll indicator -->
-    <div class="text-center mt-16">
-      <div class="inline-flex flex-col items-center text-secondary/60 hover:text-secondary transition-colors duration-300 cursor-pointer" onclick="document.getElementById('servicios')?.scrollIntoView({behavior: 'smooth'})">
+    <div class="text-center mt-16 flex justify-center">
+      <div class="inline-flex flex-col items-center text-yellow-400/60 hover:text-yellow-400 transition-colors duration-300 cursor-pointer" onclick="document.getElementById('servicios')?.scrollIntoView({behavior: 'smooth'})">
         <span class="text-sm mb-2">Descubre más</span>
         <svg class="w-6 h-6 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>

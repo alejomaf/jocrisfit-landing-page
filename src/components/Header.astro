@@ -1,5 +1,6 @@
 ---
 // Header component for José Valverde's fitness coaching landing page
+
 const navItems = [
   { href: '#inicio', label: 'Inicio' },
   { href: '#servicios', label: 'Servicios' },
@@ -8,66 +9,62 @@ const navItems = [
 ];
 ---
 
-<header id="site-header" class="fixed top-0 inset-x-0 z-50 bg-black/95 backdrop-blur-sm border-b border-yellow-400/20 transition-colors duration-300">
-  <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full" aria-label="Principal">
-    <div class="flex items-stretch justify-between min-h-16 h-16 lg:h-auto lg:py-2">
-      <!-- Logo -->
-      <a href="#inicio" class="flex items-center space-x-3 pr-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 rounded-full">
-        <div class="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center shadow ring-1 ring-white/10">
-          <span class="text-black font-bold text-xl select-none">JV</span>
-        </div>
-        <span class="text-yellow-400 font-heading font-bold text-xl tracking-tight">José Valverde</span>
-      </a>
-
-      <!-- Desktop Navigation -->
-      <div class="hidden lg:flex items-center flex-1 ml-4 xl:ml-8 gap-6 xl:gap-10">
-        <ul class="flex flex-1 items-center justify-center gap-6 xl:gap-10" role="list">
-          {navItems.map(item => (
-            <li>
-              <a href={item.href} class="text-white/90 hover:text-yellow-400 focus-visible:text-yellow-400 transition-colors duration-300 font-medium tracking-wide leading-tight px-2 py-2 xl:px-3 rounded-md whitespace-nowrap focus:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black">
-                {item.label}
-              </a>
-            </li>
-          ))}
-        </ul>
-        <button class="btn-primary shrink-0 whitespace-nowrap shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-yellow-300/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black transition-transform hover:-translate-y-0.5 active:translate-y-0">
-          Consulta Gratis
-        </button>
+<a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-yellow-400 text-black px-4 py-2 rounded-md font-semibold z-50">Saltar al contenido</a>
+<header id="site-header" class="fixed top-0 inset-x-0 z-50 bg-black/95 backdrop-blur-sm border-b border-yellow-400/20 supports-[backdrop-filter]:bg-black/75 transition-colors duration-300">
+  <div id="scroll-progress" class="absolute top-0 left-0 h-1 bg-yellow-400 transform-gpu origin-left transition-transform duration-150 ease-out" style="transform: scaleX(0);" aria-hidden="true"></div>
+  <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-stretch justify-between min-h-16 h-16 lg:h-auto lg:py-2" aria-label="Principal">
+    <!-- Logo -->
+    <a href="#inicio" class="flex items-center space-x-3 pr-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 rounded-full">
+      <div class="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center shadow ring-1 ring-white/10">
+       <img src="public/logo.webp" alt="Logo de José Valverde" class="w-6 h-6"/>
       </div>
+      <span class="text-yellow-400 font-bold text-xl tracking-tight">José Valverde</span>
+    </a>
 
-      <!-- Mobile Menu Button -->
-      <button 
-        id="mobile-menu-button"
-        class="lg:hidden text-yellow-400 hover:text-yellow-300 transition-colors duration-300 p-2 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
-        aria-label="Abrir menú de navegación"
-        aria-expanded="false"
-        aria-controls="mobile-menu"
-      >
-        <svg id="icon-open" class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
-        <svg id="icon-close" class="w-7 h-7 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+    <!-- Desktop Navigation -->
+    <div class="hidden lg:flex items-center flex-1 ml-4 xl:ml-8 gap-6 xl:gap-10">
+      <ul class="flex flex-1 items-center justify-center gap-4 xl:gap-8" role="list">
+        {navItems.map(item => (
+          <li>
+            <a data-nav-link href={item.href} class="relative px-3 py-2 text-white/80 hover:text-yellow-400 transition-colors duration-200 font-medium text-sm tracking-wide focus:outline-none focus:ring-2 focus:ring-yellow-400/50 rounded-md" data-section={item.href.substring(1)}>{item.label}</a>
+          </li>
+        ))}
+      </ul>
+      <button class="inline-flex items-center gap-2 bg-yellow-400 text-black font-semibold px-6 py-2.5 rounded-lg transition-all duration-300 hover:bg-yellow-500 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-yellow-400/50 shadow-lg shrink-0 whitespace-nowrap focus-visible:ring-2 focus-visible:ring-yellow-300/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black hover:-translate-y-0.5 active:translate-y-0">
+        Consulta Gratis
       </button>
     </div>
 
-    <!-- Mobile Menu -->
-    <div id="mobile-menu" class="lg:hidden origin-top scale-y-0 opacity-0 pointer-events-none transition-all duration-300 ease-out bg-black/95 backdrop-blur-sm border-t border-yellow-400/20" hidden>
-      <div class="px-4 py-6 space-y-1">
-        <ul class="space-y-1" role="list">
-          {navItems.map(item => (
-            <li>
-              <a href={item.href} class="block text-white/90 hover:text-yellow-400 hover:bg-yellow-400/10 focus-visible:text-yellow-400 focus-visible:bg-yellow-400/10 transition-colors duration-300 font-medium px-3 py-3 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black">
-                {item.label}
-              </a>
-            </li>
-          ))}
-        </ul>
-        <div class="pt-4 mt-4 border-t border-yellow-400/20">
-          <button class="btn-primary w-full shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-yellow-300/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black">
-            Consulta Gratis
-          </button>
-        </div>
+    <!-- Mobile Menu Button -->
+    <button
+      id="mobile-menu-button"
+      class="lg:hidden text-yellow-400 hover:text-yellow-300 transition-colors duration-300 p-2 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+      aria-label="Abrir menú de navegación"
+      aria-expanded="false"
+      aria-controls="mobile-menu"
+    >
+      <svg id="icon-open" class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+      <svg id="icon-close" class="w-7 h-7 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+    </button>
+  </nav>
+
+  <!-- Mobile Menu -->
+  <div id="mobile-menu" class="lg:hidden origin-top scale-y-0 opacity-0 pointer-events-none transition-all duration-300 ease-out bg-black/95 backdrop-blur-sm border-t border-yellow-400/20" hidden>
+    <div class="px-4 py-6 space-y-1">
+      <ul class="space-y-1" role="list">
+        {navItems.map(item => (
+          <li>
+            <a data-nav-link href={item.href} class="block w-full text-left px-3 py-3 rounded-md text-white/90 hover:text-yellow-400 hover:bg-yellow-400/10 transition-colors duration-200 font-medium" data-section={item.href.substring(1)}>{item.label}</a>
+          </li>
+        ))}
+      </ul>
+      <div class="pt-4 mt-4 border-t border-yellow-400/20">
+        <button class="inline-flex items-center justify-center gap-2 bg-yellow-400 text-black font-semibold px-6 py-2.5 rounded-lg transition-all duration-300 hover:bg-yellow-500 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-yellow-400/50 shadow-lg w-full focus-visible:ring-2 focus-visible:ring-yellow-300/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black">
+          Consulta Gratis
+        </button>
       </div>
     </div>
-  </nav>
+  </div>
 </header>
 
 <script>
@@ -77,63 +74,105 @@ const navItems = [
     const iconOpen = document.getElementById('icon-open');
     const iconClose = document.getElementById('icon-close');
     const mobileMenu = document.getElementById('mobile-menu');
+    const progressBar = document.getElementById('scroll-progress');
+    const navLinks = Array.from(document.querySelectorAll('[data-nav-link]')) as HTMLAnchorElement[];
 
-    if (!mobileMenuButton) return; // Si no existe, no continuar
+    // Toggle mobile menu
+    if (mobileMenuButton) {
+      const toggleMenu = () => {
+        const isOpen = mobileMenuButton.getAttribute('aria-expanded') === 'true';
+        const nowOpen = !isOpen;
+        mobileMenuButton.setAttribute('aria-expanded', String(nowOpen));
+        mobileMenuButton.setAttribute('aria-label', nowOpen ? 'Cerrar menú de navegación' : 'Abrir menú de navegación');
+        mobileMenu?.toggleAttribute('hidden', !nowOpen);
+        if (mobileMenu) {
+          mobileMenu.classList.toggle('pointer-events-none', !nowOpen);
+          mobileMenu.classList.toggle('opacity-0', !nowOpen);
+          mobileMenu.classList.toggle('scale-y-0', !nowOpen);
+        }
+        iconOpen?.classList.toggle('hidden', nowOpen);
+        iconClose?.classList.toggle('hidden', !nowOpen);
+        if (nowOpen) {
+          (mobileMenu?.querySelector('a') as HTMLAnchorElement | null)?.focus();
+        } else {
+          mobileMenuButton.focus();
+        }
+      };
+      mobileMenuButton.addEventListener('click', toggleMenu);
 
-    const toggleMenu = () => {
-      const isOpen = mobileMenuButton.getAttribute('aria-expanded') === 'true';
-      const nowOpen = !isOpen;
-      mobileMenuButton.setAttribute('aria-expanded', String(nowOpen));
-      mobileMenuButton.setAttribute('aria-label', nowOpen ? 'Cerrar menú de navegación' : 'Abrir menú de navegación');
-      mobileMenu?.toggleAttribute('hidden', !nowOpen);
-      if (mobileMenu) {
-        mobileMenu.classList.toggle('pointer-events-none', !nowOpen);
-        mobileMenu.classList.toggle('opacity-0', !nowOpen);
-        mobileMenu.classList.toggle('scale-y-0', !nowOpen);
-      }
-      iconOpen?.classList.toggle('hidden', nowOpen);
-      iconClose?.classList.toggle('hidden', !nowOpen);
-      if (nowOpen) {
-        (mobileMenu?.querySelector('a') as HTMLAnchorElement | null)?.focus();
-      } else {
-        mobileMenuButton.focus();
-      }
-    };
+      document.addEventListener('click', (e) => {
+        const target = e.target as Node | null;
+        if (!mobileMenu) return;
+        if (target && (mobileMenuButton.contains(target) || mobileMenu.contains(target))) return;
+        if (mobileMenuButton.getAttribute('aria-expanded') === 'true') toggleMenu();
+      });
 
-    mobileMenuButton.addEventListener('click', toggleMenu);
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && mobileMenuButton.getAttribute('aria-expanded') === 'true') {
+          toggleMenu();
+        }
+      });
+    }
 
-    document.addEventListener('click', (e) => {
-      const target = e.target as Node | null;
-      if (!mobileMenu) return;
-      if (target && (mobileMenuButton.contains(target) || mobileMenu.contains(target))) return;
-      if (mobileMenuButton.getAttribute('aria-expanded') === 'true') toggleMenu();
-    });
-
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && mobileMenuButton.getAttribute('aria-expanded') === 'true') {
-        toggleMenu();
-      }
-    });
-
+    // Smooth scroll with header offset
     const headerHeight = () => header?.offsetHeight || 0;
-    const navLinks = document.querySelectorAll('a[href^="#"]');
     navLinks.forEach(link => {
       link.addEventListener('click', (e) => {
         const targetId = link.getAttribute('href')?.substring(1);
-        const targetElement = document.getElementById(targetId || '');
+        const targetElement = targetId ? document.getElementById(targetId) : null;
         if (targetElement) {
           e.preventDefault();
-          const top = targetElement.getBoundingClientRect().top + window.scrollY - headerHeight() - 8;
+          const top = targetElement.getBoundingClientRect().top + window.scrollY - headerHeight() - 4;
           window.scrollTo({ top, behavior: 'smooth' });
-          if (mobileMenuButton.getAttribute('aria-expanded') === 'true') toggleMenu();
+          if (mobileMenuButton?.getAttribute('aria-expanded') === 'true') {
+            mobileMenuButton.click();
+          }
         }
       });
     });
 
+    // Active link highlighting via IntersectionObserver
+    const sections = navLinks
+      .map(l => l.getAttribute('data-section'))
+      .filter(Boolean)
+      .map(id => document.getElementById(id!))
+      .filter(Boolean) as HTMLElement[];
+
+    let activeId: string | null = null;
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          activeId = entry.target.id;
+        }
+      });
+      if (activeId) {
+        navLinks.forEach(l => {
+          const isActive = l.getAttribute('data-section') === activeId;
+          if (isActive) {
+            l.classList.add('text-yellow-400', '!text-yellow-400');
+            l.classList.remove('text-white/80');
+          } else {
+            l.classList.remove('text-yellow-400', '!text-yellow-400');
+            l.classList.add('text-white/80');
+          }
+        });
+      }
+    }, { rootMargin: '-50% 0px -40% 0px', threshold: [0, 0.25, 0.5, 0.75, 1] });
+
+    sections.forEach(sec => observer.observe(sec));
+
+    // Scroll progress + header style
     const handleScroll = () => {
       const scrolled = window.scrollY > 10;
       header?.classList.toggle('border-yellow-400/40', scrolled);
       header?.classList.toggle('bg-black/90', scrolled);
+      if (progressBar) {
+        const h = document.documentElement;
+        const max = h.scrollHeight - h.clientHeight;
+        const ratio = max > 0 ? window.scrollY / max : 0;
+        progressBar.style.setProperty('--progress', String(ratio));
+        progressBar.style.transform = `scaleX(${ratio})`;
+      }
     };
     handleScroll();
     window.addEventListener('scroll', handleScroll, { passive: true });

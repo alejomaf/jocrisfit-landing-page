@@ -1,15 +1,9 @@
 ---
-// Base layout for José Valverde's fitness coaching landing page
-import '../styles/global.css';
-
-export interface Props {
-  title: string;
-  description?: string;
-}
-
+// Base layout con Tailwind CSS
+import '../styles/tailwind.css';
+export interface Props { title: string; description?: string; }
 const { title, description = "Entrenador personal certificado especializado en asesorías personalizadas de fitness y nutrición. Transforma tu cuerpo y mente con José Valverde." } = Astro.props;
 ---
-
 <!DOCTYPE html>
 <html lang="es">
   <head>
@@ -17,127 +11,28 @@ const { title, description = "Entrenador personal certificado especializado en a
     <meta name="description" content={description} />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="generator" content={Astro.generator} />
-    
-    <!-- SEO Meta Tags -->
-    <meta name="author" content="José Valverde" />
-    <meta name="keywords" content="entrenador personal, fitness, nutrición, asesoría personalizada, entrenamiento, José Valverde, gym, salud, bienestar" />
-    <meta name="robots" content="index, follow" />
-    
-    <!-- Open Graph Meta Tags -->
-    <meta property="og:title" content={title} />
-    <meta property="og:description" content={description} />
-    <meta property="og:type" content="website" />
-    <meta property="og:locale" content="es_ES" />
-    
-    <!-- Twitter Card Meta Tags -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content={title} />
-    <meta name="twitter:description" content={description} />
-    
-    <!-- Preload Critical Resources -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    
-    <!-- Global styles are automatically imported by Astro + Tailwind -->
-    
-    <title>{title}</title>
-  </head>
-  <body class="antialiased">
-    <slot />
-    
-    <!-- Global Scripts -->
-    <script>
-      // Add smooth scrolling behavior for the entire page
-      document.documentElement.style.scrollBehavior = 'smooth';
-      
-      // Add loading animation
-      window.addEventListener('load', () => {
-        document.body.classList.add('loaded');
-      });
-      
-      // Add scroll-based header background opacity
-      let lastScrollY = window.scrollY;
-      
-      window.addEventListener('scroll', () => {
-        const header = document.querySelector('header');
-        if (header) {
-          if (window.scrollY > 100) {
-            header.classList.add('scrolled');
-          } else {
-            header.classList.remove('scrolled');
-          }
-        }
-        lastScrollY = window.scrollY;
-      });
-      
-      // Add intersection observer for animations
-      const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
-      };
-      
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('animate-in');
-          }
-        });
-      }, observerOptions);
-      
-      // Observe all sections for animations
-      document.addEventListener('DOMContentLoaded', () => {
-        const sections = document.querySelectorAll('section');
-        sections.forEach(section => {
-          observer.observe(section);
-        });
-      });
-    </script>
-    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet" />
+     <title>{title}</title>
     <style>
-      /* Loading and animation styles */
-      body {
-        opacity: 0;
-        transition: opacity 0.3s ease-in-out;
-      }
-      
-      body.loaded {
-        opacity: 1;
-      }
-      
-      header.scrolled {
-        background-color: rgba(0, 0, 0, 0.98) !important;
-        backdrop-filter: blur(10px);
-      }
-      
-      section {
-        opacity: 0;
-        transform: translateY(30px);
-        transition: all 0.8s ease-out;
-      }
-      
-      section.animate-in {
-        opacity: 1;
-        transform: translateY(0);
-      }
-      
-      /* Custom scrollbar */
-      ::-webkit-scrollbar {
-        width: 8px;
-      }
-      
-      ::-webkit-scrollbar-track {
-        background: #1a1a1a;
-      }
-      
-      ::-webkit-scrollbar-thumb {
-        background: #FFFF00;
-        border-radius: 4px;
-      }
-      
-      ::-webkit-scrollbar-thumb:hover {
-        background: #FFD700;
-      }
+      html{scroll-behavior:smooth}
+      body{font-family:'Inter',system-ui,sans-serif;background:#000;color:#fff;line-height:1.6;-webkit-font-smoothing:antialiased}
+      h1,h2,h3,h4,h5,h6{font-family:'Poppins',system-ui,sans-serif;font-weight:700;line-height:1.2}
+      .hidden{display:none!important}
     </style>
+  </head>
+  <body>
+    <slot />
+    <script>
+      const header=document.querySelector('header.site-header');
+      const toggle=document.getElementById('nav-toggle');
+      const mobileMenu=document.getElementById('mobile-menu');
+      const linkEls=[...document.querySelectorAll('[data-scroll]')];
+      function setActive(){let fromTop=window.scrollY+130;linkEls.forEach(a=>{const id=a.getAttribute('href');if(!id||id.charAt(0)!=='#')return;const sec=document.querySelector(id) as HTMLElement;if(sec&&sec.offsetTop<=fromTop&&sec.offsetTop+sec.offsetHeight>fromTop){a.classList.add('active')}else a.classList.remove('active')})}
+      window.addEventListener('scroll',()=>{setActive();if(header){header.classList.toggle('scrolled',window.scrollY>10)}});
+      setActive();
+      if(toggle && mobileMenu){toggle.addEventListener('click',()=>{mobileMenu.classList.toggle('hidden');toggle.setAttribute('aria-expanded',mobileMenu.classList.contains('hidden')?'false':'true')}); mobileMenu.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>mobileMenu.classList.add('hidden')))}
+    </script>
   </body>
 </html>
