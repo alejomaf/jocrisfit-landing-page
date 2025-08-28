@@ -13,6 +13,7 @@
     "@tailwindcss/vite": "^4.1.12",
     "astro": "^5.13.4",
     "resend": "^6.0.1",
+    "scraper-instagram": "^1.0.17",
     "tailwindcss": "^4.1.12"
   }
 }

@@ -2,11 +2,14 @@ import type { APIRoute } from 'astro';
 
 interface InstagramPost {
   id: string;
-  imageUrl: string;
+  url: string;
+  title: string;
+  description: string;
+  details: string;
   likes: string;
   comments: string;
-  caption?: string;
-  timestamp?: string;
+  imageUrl?: string;
+  timestamp?: number;
 }
 
 interface CacheEntry {
@@ -19,85 +22,133 @@ const cache = new Map<string, CacheEntry>();
 const CACHE_KEY = 'instagram_posts';
 const CACHE_DURATION = parseInt(import.meta.env.INSTAGRAM_CACHE_DURATION || '30') * 60 * 1000;
 
-// Instagram API configuration
-const INSTAGRAM_ACCESS_TOKEN = import.meta.env.INSTAGRAM_ACCESS_TOKEN;
-const INSTAGRAM_ENABLED = import.meta.env.INSTAGRAM_ENABLED !== 'false';
-
-// Función para obtener posts del usuario usando Instagram Basic Display API
+// Función para obtener posts usando datos estáticos de transformaciones
 async function fetchInstagramPosts(): Promise<InstagramPost[]> {
-  if (!INSTAGRAM_ACCESS_TOKEN) {
-    console.warn('Instagram access token not configured, using fallback data');
-    return getFallbackPosts();
-  }
+  return await getStaticTransformationPosts();
+}
 
+// Función para obtener ID del post desde URL
+function getId(url: string): string | null {
+  const regex = /instagram.com\/(?:[A-Za-z0-9_.]+\/)?(p|reels|reel|stories)\/([A-Za-z0-9-_]+)/;
+  const match = url.match(regex);
+  return match && match[2] ? match[2] : null;
+}
+
+// Función para obtener datos de Instagram usando GraphQL API
+async function getInstagramGraphqlData(url: string): Promise<any> {
+  const igId = getId(url);
+  if (!igId) return null;
+
+  // Variables de entorno para headers
+  const _userAgent = process.env.USER_AGENT || 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
+  const _xIgAppId = process.env.X_IG_APP_ID || '936619743392459';
+
+  // Crear URL de GraphQL
+  const graphql = new URL('https://www.instagram.com/api/graphql');
+  graphql.searchParams.set('variables', JSON.stringify({ shortcode: igId }));
+  graphql.searchParams.set('doc_id', '10015901848480474');
+  graphql.searchParams.set('lsd', 'AVqbxe3J_YA');
+
+  const response = await fetch(graphql, {
+    method: 'POST',
+    headers: {
+      'User-Agent': _userAgent,
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'X-IG-App-ID': _xIgAppId,
+      'X-FB-LSD': 'AVqbxe3J_YA',
+      'X-ASBD-ID': '129477',
+      'Sec-Fetch-Site': 'same-origin'
+    }
+  });
+
+  const json = await response.json();
+  const items = json?.data?.xdt_shortcode_media;
+
+  return {
+    __typename: items?.__typename,
+    shortcode: items?.shortcode,
+    dimensions: items?.dimensions,
+    display_url: items?.display_url,
+    display_resources: items?.display_resources,
+    has_audio: items?.has_audio,
+    video_url: items?.video_url,
+    video_view_count: items?.video_view_count,
+    video_play_count: items?.video_play_count,
+    is_video: items?.is_video,
+    caption: items?.edge_media_to_caption?.edges[0]?.node?.text,
+    is_paid_partnership: items?.is_paid_partnership,
+    location: items?.location,
+    owner: items?.owner,
+    product_type: items?.product_type,
+    video_duration: items?.video_duration,
+    thumbnail_src: items?.thumbnail_src,
+    clips_music_attribution_info: items?.clips_music_attribution_info,
+    sidecar: items?.edge_sidecar_to_children?.edges,
+    like_count: items?.edge_media_preview_like?.count,
+    comment_count: items?.edge_media_to_parent_comment?.count
+  };
+}
+
+// Función para obtener datos reales de Instagram usando GraphQL
+async function scrapeInstagramPost(postUrl: string): Promise<InstagramPost | null> {
   try {
-    // Obtener posts del usuario
-    const response = await fetch(
-      `https://graph.instagram.com/me/media?fields=id,media_type,media_url,thumbnail_url,caption,timestamp,like_count,comments_count&access_token=${INSTAGRAM_ACCESS_TOKEN}`
-    );
+    const postId = postUrl.split('/p/')[1]?.split('/')[0];
+    if (!postId) return null;
 
-    if (!response.ok) {
-      console.error('Instagram API error:', response.status, response.statusText);
-      return getFallbackPosts();
-    }
-
-    const data = await response.json();
+    console.log(`Intentando obtener datos del post: ${postId}`);
     
-    if (!data.data || !Array.isArray(data.data)) {
-      console.error('Invalid Instagram API response format');
-      return getFallbackPosts();
+    // Usar GraphQL API de Instagram
+    const postData = await getInstagramGraphqlData(postUrl);
+    
+    if (postData && postData.display_url) {
+      return {
+        id: postId,
+        url: postUrl,
+        imageUrl: postData.display_url,
+        title: "Transformación JocrisFit",
+        description: postData.caption ? postData.caption.substring(0, 100) + '...' : "Increíble transformación de uno de nuestros clientes",
+        details: "Resultados reales obtenidos con nuestro programa personalizado",
+        likes: postData.like_count?.toString() || "0",
+        comments: postData.comment_count?.toString() || "0",
+        timestamp: Date.now()
+      };
     }
-
-    // Filtrar solo imágenes y videos, convertir a nuestro formato
-    const posts: InstagramPost[] = data.data
-      .filter((item: any) => item.media_type === 'IMAGE' || item.media_type === 'VIDEO')
-      .slice(0, 6) // Limitar a 6 posts
-      .map((item: any) => ({
-        id: item.id,
-        imageUrl: item.media_type === 'VIDEO' ? (item.thumbnail_url || item.media_url) : item.media_url,
-        likes: item.like_count?.toString() || '0',
-        comments: item.comments_count?.toString() || '0',
-        caption: item.caption || '',
-        timestamp: item.timestamp || ''
-      }));
-
-    return posts;
+    
+    return null;
   } catch (error) {
-    console.error('Error fetching Instagram posts:', error);
-    return getFallbackPosts();
+    console.error('Error scraping Instagram post:', error);
+    return null;
   }
 }
 
-// Función para generar datos de fallback cuando la API no está disponible
-function getFallbackPosts(): InstagramPost[] {
-  const fallbackPosts: InstagramPost[] = [
+// Función para obtener transformaciones reales
+async function getStaticTransformationPosts(): Promise<InstagramPost[]> {
+  const postUrl = "https://www.instagram.com/p/DNDtwCXIcoF/";
+  const scrapedPost = await scrapeInstagramPost(postUrl);
+  
+  if (scrapedPost) {
+    return [scrapedPost];
+  }
+  
+  // Fallback con datos básicos si el scraping falla
+  return [
     {
-      id: 'fallback_1',
-      imageUrl: 'https://picsum.photos/400/400?random=1',
-      likes: '127',
-      comments: '23',
-      caption: 'Entrenamiento de fuerza - Transformación en progreso 💪',
-      timestamp: new Date().toISOString()
-    },
-    {
-      id: 'fallback_2', 
-      imageUrl: 'https://picsum.photos/400/400?random=2',
-      likes: '89',
-      comments: '15',
-      caption: 'Rutina de cardio matutina ☀️',
-      timestamp: new Date().toISOString()
-    },
-    {
-      id: 'fallback_3',
-      imageUrl: 'https://picsum.photos/400/400?random=3', 
-      likes: '156',
-      comments: '31',
-      caption: 'Alimentación saludable es clave 🥗',
-      timestamp: new Date().toISOString()
+      id: "DNDtwCXIcoF",
+      url: postUrl,
+      imageUrl: "https://scontent-mad1-1.cdninstagram.com/v/t51.29350-15/470726064_18473067816046978_8087516799988776416_n.jpg",
+      title: "Transformación JocrisFit",
+      description: "Increíble transformación de uno de nuestros clientes",
+      details: "Resultados reales obtenidos con nuestro programa personalizado",
+      likes: "0",
+      comments: "0",
+      timestamp: Date.now()
     }
   ];
+}
 
-  return fallbackPosts;
+// Función de fallback (mantenida para compatibilidad)
+function getFallbackPosts(): InstagramPost[] {
+  return [];
 }
 
 // Función para verificar si el cache es válido
@@ -108,19 +159,6 @@ function isCacheValid(cacheEntry: CacheEntry | undefined): boolean {
 
 export const GET: APIRoute = async ({ url }) => {
   try {
-    if (!INSTAGRAM_ENABLED) {
-      return new Response(
-        JSON.stringify({ 
-          error: 'Instagram integration disabled',
-          message: 'Set INSTAGRAM_ENABLED=true to enable Instagram integration'
-        }), 
-        { 
-          status: 503,
-          headers: { 'Content-Type': 'application/json' }
-        }
-      );
-    }
-
     const clearCache = url.searchParams.get('clearCache') === 'true';
     
     if (clearCache) {
@@ -160,7 +198,7 @@ export const GET: APIRoute = async ({ url }) => {
         data: posts,
         cached: false,
         timestamp: Date.now(),
-        usingRealData: !!INSTAGRAM_ACCESS_TOKEN
+        usingStaticData: true
       }),
       { 
         status: 200,

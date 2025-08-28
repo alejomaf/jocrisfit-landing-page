@@ -126,27 +126,17 @@ const FALLBACK_POSTS = [
   // Variable global para almacenar los posts
   let instagramPosts: Record<string, InstagramPost> = {};
 
-  // Datos de fallback
-  const fallbackPosts: InstagramPost[] = [
-    {
-      id: 'DNDtwCXIcoF',
-      url: 'https://www.instagram.com/p/DNDtwCXIcoF/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==',
-      title: 'Transformación Increíble',
-      description: 'Mira esta increíble transformación de uno de nuestros clientes.',
-      details: 'Cliente dedicado que logró sus objetivos en 3 meses con nuestro programa personalizado.',
-      likes: '245',
-      comments: '32'
-    }
-  ];
+  // Sin datos de fallback - solo mostrar transformaciones reales
+  const fallbackPosts: InstagramPost[] = [];
 
   // Función para obtener posts desde el API
   async function fetchInstagramPosts(): Promise<InstagramPost[]> {
     try {
       const response = await fetch('/api/instagram');
-      const data = await response.json();
+      const result = await response.json();
       
-      if (data.success && data.posts) {
-        return data.posts;
+      if (result.success && result.data) {
+        return result.data;
       } else {
         console.warn('API response not successful, using fallback data');
         return fallbackPosts;
@@ -255,7 +245,7 @@ const FALLBACK_POSTS = [
     }
   }
 
-  // Función para cargar los iframes de Instagram
+  // Función para cargar las imágenes de transformaciones
   async function loadInstagramIframes(posts: InstagramPost[]) {
     for (const post of posts) {
       const container = document.getElementById(`instagram-${post.id}`);
@@ -263,36 +253,46 @@ const FALLBACK_POSTS = [
         const spinner = container.querySelector('.loading-spinner');
         
         try {
-          const embedUrl = post.url.replace(/\?.*$/, '') + 'embed/captioned/?cr=1&v=14&wp=1080&rd=https%3A%2F%2Fwww.instagram.com&rp=%2Fp%2F' + post.id;
-          
-          const iframe = document.createElement('iframe');
-          iframe.src = embedUrl;
-          iframe.width = '100%';
-          iframe.height = '400';
-          iframe.frameBorder = '0';
-          iframe.scrolling = 'no';
-          iframe.setAttribute('allowtransparency', 'true');
-          iframe.style.border = 'none';
-          iframe.style.borderRadius = '0.5rem';
-          iframe.loading = 'lazy';
-          
-          iframe.onload = () => {
+          // Verificar que tenemos la URL de imagen
+          if (!post.imageUrl) {
+            console.warn(`No image URL found for post ${post.id}`);
             if (spinner) {
-              (spinner as HTMLElement).style.display = 'none';
+              spinner.innerHTML = '<p class="text-gray-400">No hay imagen disponible</p>';
+            }
+            continue;
+          }
+          
+          // Crear elemento de imagen usando el proxy para evitar CORS
+          const img = document.createElement('img');
+          // Usar el endpoint proxy para servir la imagen de Instagram
+          img.src = `/api/instagram-image?url=${encodeURIComponent(post.imageUrl)}`;
+          img.alt = post.title;
+          img.className = 'w-full h-full object-cover';
+          img.loading = 'lazy';
+          
+          // Manejar carga exitosa
+          img.onload = () => {
+            console.log(`Image loaded successfully for post ${post.id}`);
+            if (spinner) {
+              container.removeChild(spinner);
             }
           };
           
-          iframe.onerror = () => {
+          // Manejar error de carga
+          img.onerror = () => {
+            console.error(`Failed to load image for post ${post.id}:`, post.imageUrl);
             if (spinner) {
-              spinner.innerHTML = '<p class="text-gray-400">Error al cargar el post</p>';
+              spinner.innerHTML = '<p class="text-gray-400 text-sm">Error al cargar la imagen</p>';
             }
           };
           
-          container.appendChild(iframe);
+          // Agregar imagen al contenedor
+          container.appendChild(img);
+          
         } catch (error) {
-          console.error('Error loading Instagram iframe:', error);
+          console.error('Error loading transformation image:', error);
           if (spinner) {
-            spinner.innerHTML = '<p class="text-gray-400">Error al cargar el post</p>';
+            spinner.innerHTML = '<p class="text-gray-400 text-sm">Error al cargar la imagen</p>';
           }
         }
       }
