@@ -24,17 +24,10 @@
         </h3>
 
         <form id="contact-form" class="space-y-8" novalidate>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div data-field-wrapper class="space-y-2">
-              <label for="firstName" class="block text-sm font-semibold text-yellow-400">Nombre *</label>
-              <input id="firstName" name="firstName" data-required type="text" placeholder="Tu nombre" class="w-full rounded-lg border border-yellow-400/30 bg-gray-800/50 px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 focus:bg-gray-800 transition-all duration-200" />
-              <small class="hidden text-xs font-medium text-red-400" data-error></small>
-            </div>
-            <div data-field-wrapper class="space-y-2">
-              <label for="lastName" class="block text-sm font-semibold text-yellow-400">Apellido *</label>
-              <input id="lastName" name="lastName" data-required type="text" placeholder="Tu apellido" class="w-full rounded-lg border border-yellow-400/30 bg-gray-800/50 px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 focus:bg-gray-800 transition-all duration-200" />
-              <small class="hidden text-xs font-medium text-red-400" data-error></small>
-            </div>
+          <div data-field-wrapper class="space-y-2">
+            <label for="name" class="block text-sm font-semibold text-yellow-400">Nombre completo *</label>
+            <input id="name" name="name" data-required type="text" placeholder="Tu nombre completo" class="w-full rounded-lg border border-yellow-400/30 bg-gray-800/50 px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 focus:bg-gray-800 transition-all duration-200" />
+            <small class="hidden text-xs font-medium text-red-400" data-error></small>
           </div>
 
           <div data-field-wrapper class="space-y-2">
@@ -43,23 +36,16 @@
             <small class="hidden text-xs font-medium text-red-400" data-error></small>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="space-y-2" data-field-wrapper>
-              <label for="phone" class="block text-sm font-semibold text-yellow-400">Teléfono</label>
-              <input id="phone" name="phone" type="tel" placeholder="" class="w-full rounded-lg border border-yellow-400/30 bg-gray-800/50 px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 focus:bg-gray-800 transition-all duration-200" />
-              <small class="hidden text-xs font-medium text-red-400" data-error></small>
-            </div>
-            <div class="space-y-2" data-field-wrapper>
-              <label for="service" class="block text-sm font-semibold text-yellow-400">Servicio de Interés</label>
-              <select id="service" name="service" class="w-full rounded-lg border border-yellow-400/30 bg-gray-800/50 px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 focus:bg-gray-800 transition-all duration-200">
-                <option value="" class="bg-gray-800 text-gray-400">Selecciona un servicio</option>
-                <option value="personal-training" class="bg-gray-800 text-white">Entrenamiento Personal 1:1</option>
-                <option value="online-coaching" class="bg-gray-800 text-white">Asesoría Online</option>
-                <option value="nutrition-coaching" class="bg-gray-800 text-white">Asesoría Nutricional</option>
-                <option value="consultation" class="bg-gray-800 text-white">Consulta Gratuita</option>
-              </select>
-              <small class="hidden text-xs font-medium text-red-400" data-error></small>
-            </div>
+          <div class="space-y-2" data-field-wrapper>
+            <label for="service" class="block text-sm font-semibold text-yellow-400">Servicio de Interés</label>
+            <select id="service" name="service" class="w-full rounded-lg border border-yellow-400/30 bg-gray-800/50 px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 focus:bg-gray-800 transition-all duration-200">
+              <option value="" class="bg-gray-800 text-gray-400">Selecciona un servicio</option>
+              <option value="personal-training" class="bg-gray-800 text-white">Entrenamiento Personal 1:1</option>
+              <option value="online-coaching" class="bg-gray-800 text-white">Asesoría Online</option>
+              <option value="nutrition-coaching" class="bg-gray-800 text-white">Asesoría Nutricional</option>
+              <option value="consultation" class="bg-gray-800 text-white">Consulta Gratuita</option>
+            </select>
+            <small class="hidden text-xs font-medium text-red-400" data-error></small>
           </div>
 
           <div data-field-wrapper class="space-y-2">
@@ -67,6 +53,9 @@
             <textarea id="message" name="message" data-required rows="5" placeholder="Cuéntame sobre tus objetivos..." class="w-full rounded-lg border border-yellow-400/30 bg-gray-800/50 px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 focus:bg-gray-800 transition-all duration-200 resize-y min-h-[120px]"></textarea>
             <small class="hidden text-xs font-medium text-red-400" data-error></small>
           </div>
+
+          <!-- Turnstile CAPTCHA -->
+          <div class="cf-turnstile" data-sitekey={import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || 'your_turnstile_site_key_here'}></div>
 
           <div class="flex items-start gap-3 rounded-xl bg-yellow-400/10 border border-yellow-400/40 p-4">
             <input id="consent" type="checkbox" class="h-5 w-5 rounded border-yellow-400/50 bg-gray-800/50 text-yellow-400 focus:ring-yellow-400 focus:ring-offset-0 focus:ring-offset-gray-900 mt-0.5 flex-shrink-0" required />
@@ -151,6 +140,9 @@
   </div>
 </section>
 
+<!-- Turnstile Script -->
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('contact-form') as HTMLFormElement;
@@ -174,6 +166,14 @@
         input.classList.remove('border-red-500','ring-1','ring-red-400/60');
         err.textContent = '';
         err.classList.add('hidden');
+      }
+    }
+
+    function showError(message: string) {
+      if (errorBox) {
+        const errorSpan = errorBox.querySelector('span');
+        if (errorSpan) errorSpan.textContent = message;
+        errorBox.classList.remove('hidden');
       }
     }
 
@@ -204,24 +204,57 @@
       });
 
       const consent = document.getElementById('consent') as HTMLInputElement;
-      if(consent && !consent.checked){ valid = false; }
+      if(consent && !consent.checked){ 
+        valid = false;
+        showError('Debes aceptar los términos para continuar');
+      }
 
-      if(!valid){ errorBox?.classList.remove('hidden'); return; }
+      if(!valid){ 
+        if(!errorBox?.classList.contains('hidden')) return;
+        errorBox?.classList.remove('hidden'); 
+        return; 
+      }
 
       btn?.setAttribute('disabled','true');
       spinner?.classList.remove('hidden');
 
       try {
-        await new Promise(r => setTimeout(r, 1200));
-        form.reset();
-        success?.classList.remove('hidden');
+        const formData = new FormData(form);
+        
+        const response = await fetch('/api/contact', {
+          method: 'POST',
+          body: formData
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          form.reset();
+          // Reset Turnstile
+          if (window.turnstile) {
+            window.turnstile.reset();
+          }
+          success?.classList.remove('hidden');
+          setTimeout(() => success?.classList.add('hidden'), 6000);
+        } else {
+          showError(result.error || 'Error enviando el mensaje');
+        }
       } catch(err){
-        errorBox?.classList.remove('hidden');
+        console.error('Error:', err);
+        showError('Error de conexión. Inténtalo de nuevo.');
       } finally {
         btn?.removeAttribute('disabled');
         spinner?.classList.add('hidden');
-        setTimeout(()=> success?.classList.add('hidden'), 6000);
       }
     });
   });
+
+  // Declare turnstile for TypeScript
+  declare global {
+    interface Window {
+      turnstile: {
+        reset: () => void;
+      };
+    }
+  }
 </script>
