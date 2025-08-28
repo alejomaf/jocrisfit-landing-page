@@ -1,70 +1,124 @@
-# Instagram API Integration
+# Instagram Basic Display API Integration
 
-Este documento describe la integración del API de Instagram para cargar dinámicamente las transformaciones en la sección correspondiente.
+Este documento describe la integración con la Instagram Basic Display API para mostrar fotos reales de Instagram en la sección de Transformaciones.
 
 ## Características
 
-### 🚀 Funcionalidades Principales
-- **Scraping Automático**: Extrae datos públicos de Instagram (likes, comentarios, imágenes)
-- **Sistema de Caché**: Almacena los datos por 30 minutos para mejorar el rendimiento
-- **Fallback Inteligente**: Usa datos de respaldo si el API falla
-- **Carga Dinámica**: Los posts se cargan automáticamente al visitar la página
-- **Gestión de Errores**: Manejo robusto de errores con opciones de reintento
+- **API oficial de Instagram**: Usa Instagram Basic Display API para datos reales
+- **Autenticación OAuth**: Flujo completo de autorización
+- **Sistema de caché**: Almacena datos por tiempo configurable
+- **Fallback inteligente**: Datos simulados cuando no hay access token
+- **Manejo de errores**: Robusto manejo de errores de API
 
-### 📊 Datos Extraídos
-- ID del post de Instagram
-- URL completa del post
-- Número de likes (actualizado)
-- Número de comentarios (actualizado)
-- URL de la imagen principal
-- Timestamp de la última actualización
+## Configuración inicial
 
-## Endpoints Disponibles
+### 1. Crear aplicación en Facebook Developers
 
-### GET `/api/instagram`
-Obtiene todos los posts de Instagram con datos actualizados.
+1. Ve a [Facebook Developers](https://developers.facebook.com/apps/)
+2. Crea una nueva aplicación
+3. Agrega el producto "Instagram Basic Display"
+4. Configura la URL de redirección: `http://localhost:4321/api/instagram/callback`
 
-**Respuesta exitosa:**
+### 2. Variables de entorno
+
+Agrega estas variables a tu archivo `.env`:
+
+```env
+# Instagram Basic Display API Configuration
+INSTAGRAM_APP_ID=tu_app_id_aqui
+INSTAGRAM_APP_SECRET=tu_app_secret_aqui
+INSTAGRAM_REDIRECT_URI=http://localhost:4321/api/instagram/callback
+INSTAGRAM_ACCESS_TOKEN=
+INSTAGRAM_CACHE_DURATION=30
+INSTAGRAM_ENABLED=true
+```
+
+### 3. Obtener Access Token
+
+1. Visita: `http://localhost:4321/api/instagram/auth`
+2. Autoriza la aplicación en Instagram
+3. Copia el `access_token` de la respuesta
+4. Agrégalo a tu `.env` como `INSTAGRAM_ACCESS_TOKEN`
+5. Reinicia el servidor de desarrollo
+
+## Datos obtenidos
+
+Para cada post de Instagram se obtiene:
+- ID del post
+- URL de la imagen (o thumbnail para videos)
+- Número de likes reales
+- Número de comentarios reales
+- Caption del post
+- Timestamp de publicación
+
+## Endpoints disponibles
+
+### GET /api/instagram/auth
+Inicia el flujo de autenticación OAuth con Instagram.
+
+**Respuesta:** Redirección a Instagram para autorización
+
+### GET /api/instagram/callback
+Maneja la respuesta de Instagram después de la autorización.
+
+**Respuesta:**
 ```json
 {
   "success": true,
-  "posts": [
-    {
-      "id": "DNDtwCXIcoF",
-      "url": "https://www.instagram.com/p/DNDtwCXIcoF/",
-      "title": "Transformación Increíble",
-      "description": "Mira esta increíble transformación de uno de nuestros clientes.",
-      "details": "Cliente dedicado que logró sus objetivos con nuestro programa personalizado.",
-      "likes": "245",
-      "comments": "32",
-      "imageUrl": "https://...",
-      "timestamp": 1756381029545
-    }
-  ],
-  "cached": true,
-  "timestamp": 1756381062628
+  "message": "Authorization successful! Copy this access token to your .env file:",
+  "access_token": "IGQVJ...",
+  "expires_in": 5183944,
+  "token_type": "bearer",
+  "instructions": {
+    "step1": "Copy the access_token value",
+    "step2": "Add it to your .env file as INSTAGRAM_ACCESS_TOKEN=your_token_here",
+    "step3": "Restart your development server",
+    "step4": "Your Instagram API will now use real data"
+  }
 }
 ```
 
+### GET `/api/instagram`
+Obtiene la lista de posts de Instagram del usuario autenticado.
+
 **Parámetros de consulta:**
-- `clear_cache=true`: Limpia el caché y fuerza una actualización
+- `clearCache=true`: Limpia el caché y obtiene datos frescos
+
+**Respuesta:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "17841234567890123",
+      "imageUrl": "https://scontent.cdninstagram.com/v/...",
+      "likes": "127",
+      "comments": "23",
+      "caption": "Entrenamiento de fuerza - Transformación en progreso 💪",
+      "timestamp": "2024-01-15T10:30:00+0000"
+    }
+  ],
+  "cached": false,
+  "timestamp": 1703123456789,
+  "usingRealData": true
+}
+```
 
 ### POST `/api/instagram`
-Agrega un nuevo post de Instagram a la lista.
+Limpia el caché para forzar actualización de datos.
 
 **Cuerpo de la petición:**
 ```json
 {
-  "postId": "NUEVO_POST_ID"
+  "postId": "cualquier_valor"
 }
 ```
 
-**Respuesta exitosa:**
+**Respuesta:**
 ```json
 {
   "success": true,
-  "post": { /* datos del nuevo post */ },
-  "message": "Post added successfully"
+  "message": "Cache cleared, fresh data will be fetched on next request"
 }
 ```
 

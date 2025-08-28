@@ -1,276 +1,231 @@
 import type { APIRoute } from 'astro';
 
-// Interfaz para los datos de Instagram
 interface InstagramPost {
   id: string;
-  url: string;
-  title: string;
-  description: string;
-  details: string;
+  imageUrl: string;
   likes: string;
   comments: string;
-  imageUrl?: string;
-  timestamp?: number;
+  caption?: string;
+  timestamp?: string;
 }
 
-// Cache simple en memoria (en producción se podría usar Redis)
-const cache = new Map<string, { data: InstagramPost[], timestamp: number }>();
-const CACHE_DURATION = 30 * 60 * 1000; // 30 minutos
+interface CacheEntry {
+  data: InstagramPost[];
+  timestamp: number;
+}
 
-// Lista de posts de Instagram a obtener
-const INSTAGRAM_POST_IDS = [
-  'DNDtwCXIcoF', // Post existente
-  // Agregar más IDs aquí
-];
+// Simple in-memory cache
+const cache = new Map<string, CacheEntry>();
+const CACHE_KEY = 'instagram_posts';
+const CACHE_DURATION = parseInt(import.meta.env.INSTAGRAM_CACHE_DURATION || '30') * 60 * 1000;
 
-// Función para obtener datos de Instagram usando oEmbed API (más confiable)
-async function scrapeInstagramPost(postId: string): Promise<InstagramPost | null> {
+// Instagram API configuration
+const INSTAGRAM_ACCESS_TOKEN = import.meta.env.INSTAGRAM_ACCESS_TOKEN;
+const INSTAGRAM_ENABLED = import.meta.env.INSTAGRAM_ENABLED !== 'false';
+
+// Función para obtener posts del usuario usando Instagram Basic Display API
+async function fetchInstagramPosts(): Promise<InstagramPost[]> {
+  if (!INSTAGRAM_ACCESS_TOKEN) {
+    console.warn('Instagram access token not configured, using fallback data');
+    return getFallbackPosts();
+  }
+
   try {
-    const postUrl = `https://www.instagram.com/p/${postId}/`;
-    
-    // Usar la API pública de oEmbed de Instagram
-    const oembedUrl = `https://graph.facebook.com/v18.0/instagram_oembed?url=${encodeURIComponent(postUrl)}&access_token=`;
-    
-    // Intentar primero con oEmbed sin token (funciona para posts públicos)
-    try {
-      const oembedResponse = await fetch(`https://graph.facebook.com/v18.0/instagram_oembed?url=${encodeURIComponent(postUrl)}`);
-      if (oembedResponse.ok) {
-        const oembedData = await oembedResponse.json();
-        
-        // Extraer datos básicos del oEmbed
-        let likes = '0';
-        let comments = '0';
-        let imageUrl = '';
-        
-        // El oEmbed no incluye likes/comments, pero podemos obtener la imagen
-        if (oembedData.thumbnail_url) {
-          imageUrl = oembedData.thumbnail_url;
-        }
-        
-        // Para likes y comentarios, usar datos simulados basados en el ID del post
-        // (En un entorno real, necesitarías la Instagram Basic Display API)
-        const simulatedData = generateSimulatedData(postId);
-        likes = simulatedData.likes;
-        comments = simulatedData.comments;
-        
-        console.log(`Retrieved post ${postId}: ${likes} likes, ${comments} comments (simulated)`);
-        
-        return {
-          id: postId,
-          url: postUrl,
-          title: 'Transformación Increíble',
-          description: 'Mira esta increíble transformación de uno de nuestros clientes.',
-          details: 'Cliente dedicado que logró sus objetivos con nuestro programa personalizado.',
-          likes,
-          comments,
-          imageUrl,
-          timestamp: Date.now()
-        };
-      }
-    } catch (oembedError) {
-      console.log('oEmbed failed, using fallback method');
+    // Obtener posts del usuario
+    const response = await fetch(
+      `https://graph.instagram.com/me/media?fields=id,media_type,media_url,thumbnail_url,caption,timestamp,like_count,comments_count&access_token=${INSTAGRAM_ACCESS_TOKEN}`
+    );
+
+    if (!response.ok) {
+      console.error('Instagram API error:', response.status, response.statusText);
+      return getFallbackPosts();
     }
+
+    const data = await response.json();
     
-    // Fallback: usar datos simulados realistas
-    const simulatedData = generateSimulatedData(postId);
-    
-    console.log(`Using simulated data for post ${postId}: ${simulatedData.likes} likes, ${simulatedData.comments} comments`);
-    
-    return {
-      id: postId,
-      url: postUrl,
-      title: 'Transformación Increíble',
-      description: 'Mira esta increíble transformación de uno de nuestros clientes.',
-      details: 'Cliente dedicado que logró sus objetivos con nuestro programa personalizado.',
-      likes: simulatedData.likes,
-      comments: simulatedData.comments,
-      imageUrl: simulatedData.imageUrl,
-      timestamp: Date.now()
-    };
-    
+    if (!data.data || !Array.isArray(data.data)) {
+      console.error('Invalid Instagram API response format');
+      return getFallbackPosts();
+    }
+
+    // Filtrar solo imágenes y videos, convertir a nuestro formato
+    const posts: InstagramPost[] = data.data
+      .filter((item: any) => item.media_type === 'IMAGE' || item.media_type === 'VIDEO')
+      .slice(0, 6) // Limitar a 6 posts
+      .map((item: any) => ({
+        id: item.id,
+        imageUrl: item.media_type === 'VIDEO' ? (item.thumbnail_url || item.media_url) : item.media_url,
+        likes: item.like_count?.toString() || '0',
+        comments: item.comments_count?.toString() || '0',
+        caption: item.caption || '',
+        timestamp: item.timestamp || ''
+      }));
+
+    return posts;
   } catch (error) {
-    console.error(`Error getting Instagram post ${postId}:`, error);
-    return null;
+    console.error('Error fetching Instagram posts:', error);
+    return getFallbackPosts();
   }
 }
 
-// Función para generar datos simulados realistas basados en el ID del post
-function generateSimulatedData(postId: string) {
-  // Usar el hash del postId para generar números consistentes pero realistas
-  let hash = 0;
-  for (let i = 0; i < postId.length; i++) {
-    const char = postId.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash; // Convert to 32bit integer
-  }
-  
-  // Generar likes entre 50 y 500
-  const likes = Math.abs(hash % 450) + 50;
-  
-  // Generar comentarios entre 5 y 50
-  const comments = Math.abs((hash * 7) % 45) + 5;
-  
-  // Generar URL de imagen placeholder
-  const imageUrl = `https://picsum.photos/400/400?random=${Math.abs(hash % 1000)}`;
-  
-  return {
-    likes: likes.toString(),
-    comments: comments.toString(),
-    imageUrl
-  };
-}
-
-// Función para obtener todos los posts
-async function getAllInstagramPosts(): Promise<InstagramPost[]> {
-  const posts: InstagramPost[] = [];
-  
-  for (const postId of INSTAGRAM_POST_IDS) {
-    const post = await scrapeInstagramPost(postId);
-    if (post) {
-      posts.push(post);
+// Función para generar datos de fallback cuando la API no está disponible
+function getFallbackPosts(): InstagramPost[] {
+  const fallbackPosts: InstagramPost[] = [
+    {
+      id: 'fallback_1',
+      imageUrl: 'https://picsum.photos/400/400?random=1',
+      likes: '127',
+      comments: '23',
+      caption: 'Entrenamiento de fuerza - Transformación en progreso 💪',
+      timestamp: new Date().toISOString()
+    },
+    {
+      id: 'fallback_2', 
+      imageUrl: 'https://picsum.photos/400/400?random=2',
+      likes: '89',
+      comments: '15',
+      caption: 'Rutina de cardio matutina ☀️',
+      timestamp: new Date().toISOString()
+    },
+    {
+      id: 'fallback_3',
+      imageUrl: 'https://picsum.photos/400/400?random=3', 
+      likes: '156',
+      comments: '31',
+      caption: 'Alimentación saludable es clave 🥗',
+      timestamp: new Date().toISOString()
     }
-  }
-  
-  return posts;
+  ];
+
+  return fallbackPosts;
 }
 
-// Función para obtener posts con caché
-async function getCachedInstagramPosts(): Promise<InstagramPost[]> {
-  const cacheKey = 'instagram_posts';
-  const cached = cache.get(cacheKey);
-  
-  // Verificar si el caché es válido
-  if (cached && (Date.now() - cached.timestamp) < CACHE_DURATION) {
-    return cached.data;
-  }
-  
-  // Obtener datos frescos
-  const posts = await getAllInstagramPosts();
-  
-  // Guardar en caché
-  cache.set(cacheKey, {
-    data: posts,
-    timestamp: Date.now()
-  });
-  
-  return posts;
+// Función para verificar si el cache es válido
+function isCacheValid(cacheEntry: CacheEntry | undefined): boolean {
+  if (!cacheEntry) return false;
+  return Date.now() - cacheEntry.timestamp < CACHE_DURATION;
 }
 
-export const GET: APIRoute = async ({ request }) => {
+export const GET: APIRoute = async ({ url }) => {
   try {
-    // Verificar si se solicita limpiar el caché
-    const url = new URL(request.url);
-    const clearCache = url.searchParams.get('clear_cache') === 'true';
+    if (!INSTAGRAM_ENABLED) {
+      return new Response(
+        JSON.stringify({ 
+          error: 'Instagram integration disabled',
+          message: 'Set INSTAGRAM_ENABLED=true to enable Instagram integration'
+        }), 
+        { 
+          status: 503,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
+    const clearCache = url.searchParams.get('clearCache') === 'true';
     
     if (clearCache) {
-      cache.clear();
-      return new Response(JSON.stringify({ message: 'Cache cleared successfully' }), {
-        status: 200,
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*'
-        }
-      });
+      cache.delete(CACHE_KEY);
+      console.log('Instagram cache cleared');
     }
+
+    // Verificar cache
+    const cachedData = cache.get(CACHE_KEY);
+    if (!clearCache && isCacheValid(cachedData)) {
+      return new Response(
+        JSON.stringify({
+          success: true,
+          data: cachedData!.data,
+          cached: true,
+          timestamp: cachedData!.timestamp
+        }),
+        { 
+          status: 200,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
+    // Obtener datos frescos
+    const posts = await fetchInstagramPosts();
     
-    // Obtener posts (con caché)
-    const posts = await getCachedInstagramPosts();
-    
-    return new Response(JSON.stringify({
-      success: true,
-      posts,
-      cached: true,
+    // Guardar en cache
+    cache.set(CACHE_KEY, {
+      data: posts,
       timestamp: Date.now()
-    }), {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-        'Cache-Control': 'public, max-age=1800' // 30 minutos
-      }
     });
-    
+
+    return new Response(
+      JSON.stringify({
+        success: true,
+        data: posts,
+        cached: false,
+        timestamp: Date.now(),
+        usingRealData: !!INSTAGRAM_ACCESS_TOKEN
+      }),
+      { 
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      }
+    );
+
   } catch (error) {
-    console.error('Error in Instagram API:', error);
-    
-    return new Response(JSON.stringify({
-      success: false,
-      error: 'Failed to fetch Instagram posts',
-      message: error instanceof Error ? error.message : 'Unknown error'
-    }), {
-      status: 500,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
+    console.error('Instagram API error:', error);
+    return new Response(
+      JSON.stringify({ 
+        error: 'Internal server error',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      }), 
+      { 
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
       }
-    });
+    );
   }
 };
 
-// Endpoint para agregar nuevos posts
 export const POST: APIRoute = async ({ request }) => {
   try {
     const body = await request.json();
     const { postId } = body;
-    
+
     if (!postId) {
-      return new Response(JSON.stringify({
-        success: false,
-        error: 'Post ID is required'
-      }), {
-        status: 400,
-        headers: {
-          'Content-Type': 'application/json'
+      return new Response(
+        JSON.stringify({ 
+          error: 'Missing post ID',
+          message: 'Please provide a postId in the request body'
+        }), 
+        { 
+          status: 400,
+          headers: { 'Content-Type': 'application/json' }
         }
-      });
+      );
     }
-    
-    // Agregar el nuevo post ID a la lista
-    if (!INSTAGRAM_POST_IDS.includes(postId)) {
-      INSTAGRAM_POST_IDS.push(postId);
-    }
-    
-    // Limpiar caché para forzar actualización
-    cache.clear();
-    
-    // Obtener el nuevo post
-    const post = await scrapeInstagramPost(postId);
-    
-    if (!post) {
-      return new Response(JSON.stringify({
-        success: false,
-        error: 'Failed to scrape Instagram post'
-      }), {
-        status: 400,
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-    }
-    
-    return new Response(JSON.stringify({
-      success: true,
-      post,
-      message: 'Post added successfully'
-    }), {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/json'
+
+    // Para agregar un post específico, necesitaríamos implementar lógica adicional
+    // Por ahora, simplemente limpiamos el cache para refrescar los datos
+    cache.delete(CACHE_KEY);
+
+    return new Response(
+      JSON.stringify({
+        success: true,
+        message: 'Cache cleared, fresh data will be fetched on next request'
+      }),
+      { 
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
       }
-    });
-    
+    );
+
   } catch (error) {
-    console.error('Error adding Instagram post:', error);
-    
-    return new Response(JSON.stringify({
-      success: false,
-      error: 'Failed to add Instagram post',
-      message: error instanceof Error ? error.message : 'Unknown error'
-    }), {
-      status: 500,
-      headers: {
-        'Content-Type': 'application/json'
+    return new Response(
+      JSON.stringify({ 
+        error: 'Invalid request',
+        message: 'Please provide valid JSON in the request body'
+      }), 
+      { 
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
       }
-    });
+    );
   }
 };
